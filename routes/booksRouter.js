@@ -79,7 +79,10 @@ bookRouter.post("/:bookId/borrow/:userId", async (req, res) => {
   try {
     const { bookId, userId } = req.params;
 
-    if (!mongoose.isValidObjectId(bookId) || !mongoose.isValidObjectId) {
+    if (
+      !mongoose.isValidObjectId(bookId) ||
+      !mongoose.isValidObjectId(userId)
+    ) {
       return res.status(400).json({ error: "Invalid bookId or userId" });
     }
 
@@ -105,7 +108,9 @@ bookRouter.post("/:bookId/borrow/:userId", async (req, res) => {
     );
 
     if (!updated) {
-      return res.status(409).json({error:  "Book is already borrowed or does not exist"})
+      return res
+        .status(409)
+        .json({ error: "Book is already borrowed or does not exist" });
     }
 
     await updated.populated("BorrowedBy", "name email");
@@ -119,11 +124,35 @@ bookRouter.post("/:bookId/borrow/:userId", async (req, res) => {
   }
 });
 
+// return a book
+bookRouter.post("/:bookId/return", async (req, res) => {
+  try {
+    const { bookId } = req.params;
+
+    if (!mongoose.isValidObjectId(bookId)) {
+      return res.status(400).json({ error: "Invalid bookId" });
+    }
 
 
-// return a book 
 
+    const updated = await Book.findOneAndUpdate(
+      { id: bookId, isAvailable: false },
+      { $set: { isAvailable: true, borrowedBy: null } },
+      { new: true },
+    );
 
+    if (!updated) {
+      return res
+        .status(409)
+        .json({ error: "Book currently is not borrowed or does not exist" });
+    }
 
+    res.status(200).json({
+      message:"Book returned", data: updated
+    });
+  } catch (errors) {
+    res.status(500).json({ errors: error.message });
+  }
+});
 
 module.exports = bookRouter;

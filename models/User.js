@@ -1,20 +1,20 @@
 const mongoose = require("mongoose");
 
-// User Schemas
+
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: [true, "Username is required!"] },
+    name: { type: String, required: [true, "Username is required"] },
     email: {
       type: String,
-      required: [true, "Email is required!"],
+      required: [true, "Email is required"],
       unique: true, // no two users with same email
       lowercase: true, // store in lowercase
       trim: true,
     },
     isStudent: {
-        type: Boolean,
-        default: false,
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// Compile schema from model
+// Compile schema
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
